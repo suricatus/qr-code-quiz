@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50a50a9ab6841ff41aa76c5ebb1b47c9, type: 3}
+  m_Name: StationData 5
+  m_EditorClassIdentifier: Assembly-CSharp::Data.StationData
+  stationId: 6
+  questionText: "Qual o nome da maior empresa de gamifica\xE7\xE3o do Brasil?"
+  answerOptions:
+  - Suricatus Games
+  - "Pregui\xE7a Jogos"
+  - Nenhuma delas
+  correctAnswerIndex: 2
+  curiosityText: A Suricatus Games possui expertise de mais de 6 anos de mercado
+    de jogos.
+  hintText: "Parab\xE9ns! Voc\xEA coletou todas as dicas, v\xE1 at\xE9 o estande
+    da Suricatus para coletar o seu brinde!"
+  puzzlePiece: {fileID: -1095226124128532051, guid: b61f5513ad331e04cb4a9996db776885, type: 3}
+  placeholderPiece: {fileID: -1095226124128532051, guid: b61f5513ad331e04cb4a9996db776885, type: 3}
+  isFinalStation: 1

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50a50a9ab6841ff41aa76c5ebb1b47c9, type: 3}
+  m_Name: StationData 2
+  m_EditorClassIdentifier: Assembly-CSharp::Data.StationData
+  stationId: 3
+  questionText: Para quem o Brasil foi eliminado na Copa do Mundo FIFA de 2026?
+  answerOptions:
+  - "Cro\xE1cia"
+  - "B\xE9lgica"
+  - Noruega
+  correctAnswerIndex: 2
+  curiosityText: O Brasil perdeu para a Noruega na Oitavas de Final, com dois gols
+    do Halaand.
+  hintText: "Voc\xEA nem sempre vai me usar para sair, mas \xE9 importante saber
+    onde eu estou caso precise."
+  puzzlePiece: {fileID: -1095226124128532051, guid: b61f5513ad331e04cb4a9996db776885, type: 3}
+  placeholderPiece: {fileID: -1095226124128532051, guid: b61f5513ad331e04cb4a9996db776885, type: 3}
+  isFinalStation: 0
