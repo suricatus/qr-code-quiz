@@ -20,7 +20,7 @@ MonoBehaviour:
   - Nenhuma delas
   correctAnswerIndex: 0
   curiosityText: A Suricatus Games possui expertise de mais de 6 anos de mercado
-    de jogos.
+    de jogos!
   hintText: "Parab\xE9ns! Voc\xEA coletou todas as dicas, retire seu brinde a\xED
     no estande da Suricatus Games!"
   puzzlePiece: {fileID: 1282491111014093581, guid: 0235a80fa3bff95438898e8fb10dfd86, type: 3}
