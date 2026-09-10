@@ -16,6 +16,9 @@ namespace Core
         public GameConfig config;
 
         [Header("Debug(Editor only)")]
+        [Tooltip("Query string do QR para simular no Editor, ex.: \"?station=1\" ou \"?prize=1\". " +
+                 "Quando preenchido, tem prioridade sobre os campos abaixo.")]
+        [SerializeField] private string debugQueryString = "";
         [SerializeField] private int debugStationId = 1;
         [SerializeField] private bool debugPrizeScreen = false;
         
@@ -37,6 +40,10 @@ namespace Core
             }
 
             Instance = this;
+
+#if UNITY_EDITOR
+            URLParameterReader.EditorQueryStringOverride = debugQueryString;
+#endif
         }
 
         private void Start()
@@ -115,7 +122,9 @@ namespace Core
             CurrentStation = null;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-            Application.ExternalEval("window.location.href = window.location.pathname;");
+            // Recarrega mantendo o ?station= do QR. Ir para a URL sem parâmetro deixaria
+            // a tela vazia, porque não existe uma tela de "escaneie um QR Code".
+            URLParameterReader.Reload();
 #else
             LoadStationFromURL();
 #endif
@@ -123,21 +132,29 @@ namespace Core
 
         private int GetStationIdFromURL()
         {
+            var raw = URLParameterReader.GetParameter(StationUrlParameter);
+            if (int.TryParse(raw, out var id))
+                return id;
+
 #if UNITY_EDITOR
             return debugStationId;
 #else
-            var raw = URLParameterReader.GetParameter(StationUrlParameter);
-            return int.TryParse(raw, out int id) ? id : -1;
+            Debug.LogWarning($"[GameManager] Parâmetro '{StationUrlParameter}' ausente ou inválido na URL " +
+                             $"'{Application.absoluteURL}'. O QR Code precisa apontar para a URL do jogo com ?{StationUrlParameter}=N.");
+            return -1;
 #endif
         }
-        
+
         private bool IsPrizeScreen()
         {
+            var raw = URLParameterReader.GetParameter(PrizeUrlParameter);
+            if (!string.IsNullOrEmpty(raw))
+                return true;
+
 #if UNITY_EDITOR
-            return debugPrizeScreen;
+            return string.IsNullOrEmpty(debugQueryString) && debugPrizeScreen;
 #else
-    var raw = URLParameterReader.GetParameter(PrizeUrlParameter);
-    return !string.IsNullOrEmpty(raw);
+            return false;
 #endif
         }
     }

@@ -38,6 +38,9 @@ namespace UI
 
         private void OnClicked()
         {
+            if (_controller == null)
+                return;
+
             _controller.OnAnswerButtonClicked(this);
         }
     }

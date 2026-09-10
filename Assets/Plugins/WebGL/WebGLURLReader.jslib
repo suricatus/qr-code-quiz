@@ -13,5 +13,9 @@
         var buffer = _malloc(bufferSize);
         stringToUTF8(queryString, buffer, bufferSize);
         return buffer;
+    },
+
+    ReloadGame: function () {
+        window.location.reload();
     }
 });
