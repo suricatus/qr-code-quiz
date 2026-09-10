@@ -10,18 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 50a50a9ab6841ff41aa76c5ebb1b47c9, type: 3}
-  m_Name: StationData 5
+  m_Name: StationData 6
   m_EditorClassIdentifier: Assembly-CSharp::Data.StationData
-  stationId: 6
-  questionText: "Quem \xE9 o maior artilheiro de todas as Copas do Mundo?"
+  stationId: 7
+  questionText: "Qual o nome da maior empresa de gamifica\xE7\xE3o do Brasil?"
   answerOptions:
-  - Lionel Messi
-  - "Kylian Mbapp\xE9"
-  - Harry Kane
-  correctAnswerIndex: 1
-  curiosityText: "Kylian Mbapp\xE9 possui 22 gols em Copas do Mundo."
-  hintText: "Falta pouco! Estou em um lugar onde voc\xEA pode conhecer muita gente
-    talentosa e ainda jogar alguns jogos bem legais!"
+  - Suricatus Games
+  - "Pregui\xE7a Jogos"
+  - Nenhuma delas
+  correctAnswerIndex: 0
+  curiosityText: A Suricatus Games possui expertise de mais de 6 anos de mercado
+    de jogos.
+  hintText: "Parab\xE9ns! Voc\xEA coletou todas as dicas, v\xE1 at\xE9 o estande
+    da Suricatus para coletar o seu brinde!"
   puzzlePiece: {fileID: 1282491111014093581, guid: 0235a80fa3bff95438898e8fb10dfd86, type: 3}
   placeholderPiece: {fileID: 6832190032243359998, guid: f973ec2e5ef687743bfbac414c3bd784, type: 3}
-  isFinalStation: 0
+  isFinalStation: 1
