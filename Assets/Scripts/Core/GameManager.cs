@@ -9,6 +9,7 @@ namespace Core
     {
         private const string StationUrlParameter = "station";
         private const string PrizeUrlParameter = "prize";
+        private const string ResetUrlParameter = "reset";
         
         public static GameManager Instance { get; private set; }
         
@@ -48,6 +49,14 @@ namespace Core
 
         private void Start()
         {
+            // "?reset=1" limpa o progresso salvo no navegador antes de carregar a tela.
+            // Serve para testar do zero sem precisar apagar os dados do site no celular.
+            if (!string.IsNullOrEmpty(URLParameterReader.GetParameter(ResetUrlParameter)))
+            {
+                ProgressManager.Instance.ResetProgress();
+                Debug.Log("[GameManager] Progresso zerado via parâmetro de URL.");
+            }
+
             if (IsPrizeScreen())
             {
                 UIController.Instance.ShowScreen(GameScreen.Prize);

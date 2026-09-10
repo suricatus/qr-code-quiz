@@ -20,6 +20,14 @@ namespace Core
         public int MissingForFinal =>
             config.stations.Count(s => !s.isFinalStation && !_completedStations.Contains(s.stationId));
 
+        // A estação final não é uma dica: ela revela o prêmio. Contar as dicas por
+        // TotalStations/CompletedCount inclui a final e dá um resultado a mais.
+        public int TotalHints =>
+            config.stations.Count(s => !s.isFinalStation);
+
+        public int CollectedHints =>
+            config.stations.Count(s => !s.isFinalStation && _completedStations.Contains(s.stationId));
+
         private void Awake()
         {
             if (Instance != null && Instance != this)

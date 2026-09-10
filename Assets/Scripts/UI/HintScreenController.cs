@@ -26,13 +26,16 @@ namespace UI
         {
             hintText.text = data.hintText;
 
-            var completed = ProgressManager.Instance.CompletedCount;
-            var total = ProgressManager.Instance.TotalStations;
-            var remaining = total - completed;
+            var collected = ProgressManager.Instance.CollectedHints;
+            var total = ProgressManager.Instance.TotalHints;
+            var remaining = total - collected;
 
-            progressText.text = remaining > 0
-                ? $"Faltam {remaining} de {total} dicas para o prêmio"
-                : "Você coletou todas as dicas!";
+            progressText.text = remaining switch
+            {
+                > 1 => $"Faltam {remaining} de {total} dicas para o prêmio",
+                1 => $"Falta 1 de {total} dicas para o prêmio",
+                _ => "Você coletou todas as dicas!"
+            };
             
             puzzleGrid.Refresh();
         }
