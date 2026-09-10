@@ -1,0 +1,66 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #231F20;
+  /* Impede o "puxa e solta" do Safari, que descola o canvas do teclado. */
+  overscroll-behavior: none;
+}
+
+/* O container e ancorado ao topo e tem a altura ajustada por JS conforme o
+   visualViewport, para acompanhar a abertura do teclado. */
+#unity-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#unity-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #231F20;
+  /* Só no canvas: evita o scroll/zoom do navegador sem bloquear o toque
+     no campo de texto que o Unity cria por cima para o teclado. */
+  touch-action: none;
+}
+
+#unity-loading-bar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+}
+
+#unity-progress-bar-empty {
+  width: 200px;
+  height: 12px;
+  border-radius: 6px;
+  background: #3a3436;
+  overflow: hidden;
+}
+
+#unity-progress-bar-full {
+  width: 0%;
+  height: 100%;
+  border-radius: 6px;
+  background: #ffd400;
+  transition: width 0.15s ease-out;
+}
+
+#unity-warning {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translate(-50%, 0);
+  background: white;
+  padding: 10px;
+  display: none;
+  text-align: center;
+  font-family: arial, sans-serif;
+  z-index: 10;
+}

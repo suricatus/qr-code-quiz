@@ -39,6 +39,9 @@ namespace EditorTools
             // Nomes previsíveis entre builds, para o cache do celular não servir arquivo velho.
             PlayerSettings.WebGL.nameFilesAsHashes = false;
 
+            // Template próprio: o "Default" do Unity não reage ao teclado do celular.
+            PlayerSettings.WebGL.template = "PROJECT:SuricatusMobile";
+
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.WebGL)
                 EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
 
