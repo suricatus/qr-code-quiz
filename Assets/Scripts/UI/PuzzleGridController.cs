@@ -9,21 +9,16 @@ namespace UI
 {
     public class PuzzleGridController : MonoBehaviour
     {
-        [Header("Grid Layout")]
-        [Tooltip("Colunas do grid. Deixe 0 para automático: todas as peças em uma fileira só, " +
-                 "sem sobra desalinhada quando o número de estações mudar.")]
-        [SerializeField] private int columnCount;
+        // Layout fica em código, fora do Inspector: além de não precisar de ajuste,
+        // campos serializados aqui já foram desfeitos várias vezes por regravações
+        // da cena pelo Unity, e renomeá-los quebrava a serialização no build.
+        private const float PieceSpacing = 12f;
+        private const float MaxPieceSize = 220f;
 
         [Header("References")]
         [SerializeField] private GameConfig config;
         [SerializeField] private RectTransform gridContainer;
         [SerializeField] private Sprite placeholderSprite;
-
-        [Header("Cell Settings")]
-        [Tooltip("Tamanho MÁXIMO de cada peça. O tamanho real é calculado para caber no " +
-                 "container, sempre quadrado, para não deformar as imagens.")]
-        [SerializeField] private Vector2 maxCellSize = new(220f, 220f);
-        [SerializeField] private Vector2 pieceSpacing = new(12f, 12f);
 
         private GridLayoutGroup _gridLayout;
         private readonly List<Image> _cells = new();
@@ -40,7 +35,7 @@ namespace UI
                 _gridLayout = gridContainer.gameObject.AddComponent<GridLayoutGroup>();
 
             _gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            _gridLayout.spacing = pieceSpacing;
+            _gridLayout.spacing = new Vector2(PieceSpacing, PieceSpacing);
             _gridLayout.childAlignment = TextAnchor.MiddleCenter;
         }
 
@@ -84,24 +79,18 @@ namespace UI
         }
 
         /// <summary>
-        /// Calcula uma célula quadrada que caiba no container com o número de peças atual,
-        /// para o grid não estourar a área nem deixar uma fileira órfã desalinhada.
+        /// Peças em fileira única, com a célula quadrada e do maior tamanho que couber
+        /// no container. Assim mudar o número de estações nunca deixa sobra desalinhada.
         /// </summary>
         private void ResizeCellsToFit(int pieceCount)
         {
-            var cols = columnCount > 0 ? Mathf.Min(columnCount, pieceCount) : pieceCount;
-            var rows = Mathf.CeilToInt(pieceCount / (float)cols);
-
             var area = gridContainer.rect.size;
-            var widthPerCell = (area.x - pieceSpacing.x * (cols - 1)) / cols;
-            var heightPerCell = (area.y - pieceSpacing.y * (rows - 1)) / rows;
+            var widthPerPiece = (area.x - PieceSpacing * (pieceCount - 1)) / pieceCount;
 
-            var side = Mathf.Min(widthPerCell, heightPerCell);
-            if (maxCellSize.x > 0f) side = Mathf.Min(side, maxCellSize.x);
-            if (maxCellSize.y > 0f) side = Mathf.Min(side, maxCellSize.y);
+            var side = Mathf.Min(widthPerPiece, area.y, MaxPieceSize);
             side = Mathf.Max(side, 1f);
 
-            _gridLayout.constraintCount = cols;
+            _gridLayout.constraintCount = pieceCount;
             _gridLayout.cellSize = new Vector2(side, side);
         }
     }

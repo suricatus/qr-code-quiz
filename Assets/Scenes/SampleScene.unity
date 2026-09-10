@@ -2981,12 +2981,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc3c098ca2d84ae786e1f9dd2adbc616, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.PuzzleGridController
-  columns: 3
   config: {fileID: 11400000, guid: 1e8fe98a53a05f8409c6a0cee62990a2, type: 2}
   gridContainer: {fileID: 980050750}
   placeholderSprite: {fileID: -5164625643622922759, guid: a554752376afda94991fd3123d39a37e, type: 3}
-  cellSize: {x: 360, y: 147.5}
-  cellSpacing: {x: 0, y: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
