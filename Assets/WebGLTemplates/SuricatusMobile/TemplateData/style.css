@@ -3,7 +3,7 @@ html, body {
   padding: 0;
   height: 100%;
   overflow: hidden;
-  background: #231F20;
+  background: #12051d;
   /* Impede o "puxa e solta" do Safari, que descola o canvas do teclado. */
   overscroll-behavior: none;
 }
@@ -22,34 +22,80 @@ html, body {
   display: block;
   width: 100%;
   height: 100%;
-  background: #231F20;
+  background: #12051d;
   /* Só no canvas: evita o scroll/zoom do navegador sem bloquear o toque
      no campo de texto que o Unity cria por cima para o teclado. */
   touch-action: none;
 }
 
-#unity-loading-bar {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  display: none;
+/* ===== Tela de carregamento =====
+   O jogo tem 19 MB: no 4G o visitante espera dezenas de segundos antes do
+   primeiro quadro. Sem marca e sem porcentagem, essa espera parece travamento,
+   e a demo perde o cliente antes de comecar. */
+#suricatus-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  box-sizing: border-box;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: #12051d;
+  color: #ffffff;
+  font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+  transition: opacity .35s ease-out;
 }
 
-#unity-progress-bar-empty {
-  width: 200px;
-  height: 12px;
+#suricatus-loading.pronto { opacity: 0; }
+
+#suricatus-logo {
+  width: 180px;
+  max-width: 45vw;
+  height: auto;
+}
+
+#suricatus-texto {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: .02em;
+}
+
+#suricatus-barra {
+  width: 260px;
+  max-width: 70vw;
+  height: 10px;
   border-radius: 6px;
-  background: #3a3436;
+  background: rgba(255, 255, 255, .14);
   overflow: hidden;
 }
 
-#unity-progress-bar-full {
+#suricatus-barra-cheia {
   width: 0%;
   height: 100%;
   border-radius: 6px;
-  background: #ffd400;
-  transition: width 0.15s ease-out;
+  background: linear-gradient(90deg, #e91e63, #00bcd4);
+  transition: width .2s ease-out;
+}
+
+#suricatus-porcento {
+  margin: 0;
+  font-size: 14px;
+  color: #a197b0;
+}
+
+#suricatus-erro {
+  margin: 0;
+  max-width: 320px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #ff8aa5;
 }
 
 #unity-warning {

@@ -10,16 +10,27 @@
   <body>
     <div id="unity-container">
       <canvas id="unity-canvas" width={{{ WIDTH }}} height={{{ HEIGHT }}} tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
+
+      <!-- Tela de carregamento com a marca. Fica por cima do canvas ate o jogo
+           estar pronto, e some sozinha. -->
+      <div id="suricatus-loading">
+        <img id="suricatus-logo" src="TemplateData/logo.png" alt="Suricatus Games">
+        <p id="suricatus-texto">Carregando o jogo…</p>
+        <div id="suricatus-barra"><div id="suricatus-barra-cheia"></div></div>
+        <p id="suricatus-porcento">0%</p>
+        <p id="suricatus-erro"></p>
       </div>
+
       <div id="unity-warning"> </div>
     </div>
     <script>
       var canvas = document.querySelector("#unity-canvas");
       var container = document.querySelector("#unity-container");
+      var telaCarregando = document.querySelector("#suricatus-loading");
+      var barraCheia = document.querySelector("#suricatus-barra-cheia");
+      var textoPorcento = document.querySelector("#suricatus-porcento");
+      var textoCarregando = document.querySelector("#suricatus-texto");
+      var textoErro = document.querySelector("#suricatus-erro");
 
       function unityShowBanner(msg, type) {
         var warningBanner = document.querySelector("#unity-warning");
@@ -71,19 +82,33 @@
         showBanner: unityShowBanner,
       };
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+      function mostrarErro(mensagem) {
+        textoCarregando.textContent = "Não foi possível carregar o jogo.";
+        textoErro.textContent = mensagem;
+        barraCheia.style.width = "0%";
+        textoPorcento.textContent = "";
+      }
 
       var script = document.createElement("script");
       script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-        }).then((unityInstance) => {
-          document.querySelector("#unity-loading-bar").style.display = "none";
+      script.onload = function () {
+        createUnityInstance(canvas, config, function (progress) {
+          var porcento = Math.round(progress * 100);
+          barraCheia.style.width = porcento + "%";
+          textoPorcento.textContent = porcento + "%";
+        }).then(function (unityInstance) {
+          // Esconde depois do fade, senao a tela volta a receber os toques.
+          telaCarregando.classList.add("pronto");
+          setTimeout(function () { telaCarregando.style.display = "none"; }, 400);
           fitToVisualViewport();
-        }).catch((message) => {
-          alert(message);
+        }).catch(function (message) {
+          // Antes isto era um alert(), que no celular do cliente aparece como
+          // um aviso do navegador, sem contexto nenhum.
+          mostrarErro(message);
         });
+      };
+      script.onerror = function () {
+        mostrarErro("Verifique sua conexão e tente abrir a página de novo.");
       };
 
       document.body.appendChild(script);
