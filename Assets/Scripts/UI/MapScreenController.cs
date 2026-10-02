@@ -27,11 +27,11 @@ namespace UI
 
         private static readonly Color CardAvailableColor = new(0.16f, 0.18f, 0.30f, 0.95f);
         private static readonly Color CardCompletedColor = new(0.14f, 0.28f, 0.26f, 0.95f);
-        private static readonly Color CardLockedColor = new(0.18f, 0.18f, 0.22f, 0.70f);
+        private static readonly Color CardLockedColor = new(0.13f, 0.17f, 0.25f, 0.97f);
         private static readonly Color TitleColor = Color.white;
         private static readonly Color StatusAvailableColor = new(0.95f, 0.3f, 0.4f);
         private static readonly Color StatusCompletedColor = new(0.45f, 0.85f, 0.6f);
-        private static readonly Color StatusLockedColor = new(0.65f, 0.65f, 0.72f);
+        private static readonly Color StatusLockedColor = new(0.48f, 0.88f, 0.98f);
 
         [Header("References")]
         [SerializeField] private GameConfig config;
@@ -53,6 +53,7 @@ namespace UI
 
         private void Awake()
         {
+            ApplyLayout();
             EnsureLayout();
 
             if (restartButton != null)
@@ -61,7 +62,27 @@ namespace UI
 
         private void OnEnable()
         {
+            ApplyLayout();
             Refresh();
+        }
+
+        private void ApplyLayout()
+        {
+            if (cardContainer != null)
+            {
+                var offsets = cardContainer.offsetMin;
+                cardContainer.offsetMin = new Vector2(offsets.x, 320f);
+            }
+
+            if (restartButton != null)
+            {
+                var buttonRect = restartButton.GetComponent<RectTransform>();
+                buttonRect.anchoredPosition = new Vector2(buttonRect.anchoredPosition.x, 170f);
+            }
+
+            var logo = transform.Find("Logo - Empresa");
+            if (logo != null && logo.TryGetComponent<RectTransform>(out var logoRect))
+                logoRect.sizeDelta = new Vector2(280f, 280f);
         }
 
         public void OnRestartClicked()
@@ -162,12 +183,17 @@ namespace UI
             cardLayout.childForceExpandWidth = false;
             cardLayout.childForceExpandHeight = true;
 
-            CreateBadge(cardGO.transform, station, isCompleted);
+            CreateBadge(cardGO.transform, station, isCompleted, isLocked);
             CreateTexts(cardGO.transform, title, StatusFor(station, isCompleted, isLocked),
                 isLocked ? StatusLockedColor : isCompleted ? StatusCompletedColor : StatusAvailableColor);
 
             var button = cardGO.GetComponent<Button>();
             button.targetGraphic = background;
+            // O tint padrão de Button reduz muito a opacidade do prêmio bloqueado e
+            // apaga o cartão sobre o fundo ilustrado. O estado já está indicado pelo
+            // baú fechado e pelo texto, então preservamos a cor do cartão.
+            if (isLocked)
+                button.transition = Selectable.Transition.None;
             button.interactable = !isLocked;
 
             if (isLocked)
@@ -203,15 +229,31 @@ namespace UI
             return isCompleted ? "Dica coletada — toque para rever" : "Toque para escanear o QR Code";
         }
 
-        private void CreateBadge(Transform parent, StationData station, bool isCompleted)
+        private void CreateBadge(Transform parent, StationData station, bool isCompleted,
+            bool isLocked)
         {
-            var badgeGO = new GameObject("Badge", typeof(Image), typeof(LayoutElement));
+            var badgeGO = new GameObject("Badge", typeof(RectTransform), typeof(LayoutElement));
             badgeGO.transform.SetParent(parent, false);
 
-            var image = badgeGO.GetComponent<Image>();
-            image.sprite = isCompleted && station.puzzlePiece != null
-                ? station.puzzlePiece
-                : station.placeholderPiece != null ? station.placeholderPiece : fallbackBadge;
+            var frameGO = new GameObject("Frame", typeof(Image));
+            frameGO.transform.SetParent(badgeGO.transform, false);
+            StretchToParent(frameGO.GetComponent<RectTransform>());
+
+            var frame = frameGO.GetComponent<Image>();
+            frame.sprite = LoadArtwork("BadgeFrame");
+            frame.preserveAspect = true;
+            frame.raycastTarget = false;
+
+            var iconGO = new GameObject("Icon", typeof(Image));
+            iconGO.transform.SetParent(badgeGO.transform, false);
+            var iconRect = iconGO.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.14f, 0.14f);
+            iconRect.anchorMax = new Vector2(0.86f, 0.86f);
+            iconRect.offsetMin = Vector2.zero;
+            iconRect.offsetMax = Vector2.zero;
+
+            var image = iconGO.GetComponent<Image>();
+            image.sprite = BadgeFor(station, isCompleted, isLocked);
             image.preserveAspect = true;
             image.enabled = image.sprite != null;
             image.raycastTarget = false;
@@ -220,6 +262,40 @@ namespace UI
             layoutElement.preferredWidth = _badgeSize;
             layoutElement.preferredHeight = _badgeSize;
             layoutElement.minWidth = _badgeSize;
+        }
+
+        private Sprite BadgeFor(StationData station, bool isCompleted, bool isLocked)
+        {
+            if (isCompleted && station.puzzlePiece != null)
+                return station.puzzlePiece;
+
+            if (station.isFinalStation)
+            {
+                var prize = LoadArtwork(isLocked ? "PrizeLocked" : "PrizeReady");
+                if (prize != null)
+                    return prize;
+            }
+            else
+            {
+                var stationQr = LoadArtwork($"QRStation_{station.stationId}");
+                if (stationQr != null)
+                    return stationQr;
+            }
+
+            return station.placeholderPiece != null ? station.placeholderPiece : fallbackBadge;
+        }
+
+        private static Sprite LoadArtwork(string name)
+        {
+            return Resources.Load<Sprite>($"Artwork/StationBadges/{name}");
+        }
+
+        private static void StretchToParent(RectTransform rect)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
         }
 
         private void CreateTexts(Transform parent, string title, string status, Color statusColor)

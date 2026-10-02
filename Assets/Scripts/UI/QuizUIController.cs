@@ -28,9 +28,13 @@ namespace UI
         [SerializeField] private Button demoBackButton;
 
         private AnswerButton _selectedButton;
+        private TextMeshProUGUI _submitLabel;
 
         private void Awake()
         {
+            _submitLabel = submitButton != null
+                ? submitButton.GetComponentInChildren<TextMeshProUGUI>(true)
+                : null;
             if (demoBackButton != null)
                 demoBackButton.onClick.AddListener(() => GameManager.Instance.ShowMap());
         }
@@ -50,7 +54,29 @@ namespace UI
 
         private void Populate(StationData data)
         {
-            questionText.text = data.questionText;
+            var stations = GameManager.Instance != null
+                           && GameManager.Instance.config != null
+                           && GameManager.Instance.config.stations != null
+                ? GameManager.Instance.config.stations
+                : Array.Empty<StationData>();
+            var total = 0;
+            var number = 0;
+            foreach (var station in stations)
+            {
+                if (station == null || station.isFinalStation)
+                    continue;
+
+                total++;
+                if (station.stationId <= data.stationId)
+                    number++;
+            }
+
+            if (number == 0)
+                number = 1;
+            if (total == 0)
+                total = 1;
+
+            questionText.text = $"<size=70%><color=#00D4E8>PERGUNTA {number} DE {total}</color></size>\n\n{data.questionText}";
             _selectedButton = null;
             SetSubmitEnabled(false);
 
@@ -88,6 +114,8 @@ namespace UI
         {
             submitButton.interactable = enabled;
             submitButtonBackground.color = enabled ? SubmitEnabledColor : SubmitDisabledColor;
+            if (_submitLabel != null)
+                _submitLabel.text = enabled ? "Confirmar resposta" : "Escolha uma opção";
         }
     }
 }

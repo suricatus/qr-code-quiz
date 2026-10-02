@@ -82,12 +82,43 @@ namespace UI
 
             if (demoPanel != null)
                 demoPanel.SetActive(isDemo);
+            if (isDemo)
+                EnsureDemoArtwork();
 
             if (titleText != null)
             {
                 _eventTitle ??= titleText.text;
                 titleText.text = isDemo ? demoTitle : _eventTitle;
             }
+        }
+
+        private void EnsureDemoArtwork()
+        {
+            if (demoPanel == null || demoPanel.transform.Find("PrizeArtwork") != null)
+                return;
+
+            var sprite = Resources.Load<Sprite>("Artwork/StationBadges/PrizeReady");
+            if (sprite == null)
+                return;
+
+            var artworkObject = new GameObject("PrizeArtwork", typeof(RectTransform), typeof(Image));
+            artworkObject.transform.SetParent(demoPanel.transform, false);
+
+            var image = artworkObject.GetComponent<Image>();
+            image.sprite = sprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+
+            var rect = artworkObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 1f);
+            rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = new Vector2(0f, -35f);
+            rect.sizeDelta = new Vector2(240f, 240f);
+
+            var message = demoPanel.transform.Find("MessagePanel") ?? demoPanel.transform.Find("Message");
+            if (message != null && message.TryGetComponent<RectTransform>(out var messageRect))
+                messageRect.offsetMax = new Vector2(messageRect.offsetMax.x, -300f);
         }
 
         private void OnPhoneValueChanged(string value)

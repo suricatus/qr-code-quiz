@@ -37,7 +37,7 @@ namespace EditorTools
         // ancorado embaixo. Mantê-las iguais é o que faz a demo não parecer enxertada.
         private const float StandardButtonWidth = 485f;
         private const float StandardButtonHeight = 158f;
-        private const float LogoSizeOnMap = 320f;
+        private const float LogoSizeOnMap = 280f;
 
         private static readonly Color PanelColor = new(0.10f, 0.11f, 0.20f, 0.92f);
         private static readonly Color TitleColor = Color.white;
@@ -169,11 +169,11 @@ namespace EditorTools
             TopAnchored(progress.rectTransform, 660f, 120f, 60f);
 
             var container = NewUIObject("Cards", mapScreen.transform).GetComponent<RectTransform>();
-            Stretch(container, 70f, 70f, 800f, 240f);
+            Stretch(container, 70f, 70f, 800f, 320f);
 
             var restartButton = CloneButton(template, mapScreen.transform, "RestartButton",
                 "Começar de novo");
-            BottomAnchored(restartButton.GetComponent<RectTransform>(), 100f,
+            BottomAnchored(restartButton.GetComponent<RectTransform>(), 170f,
                 StandardButtonWidth, StandardButtonHeight);
 
             var controller = mapScreen.AddComponent<MapScreenController>();
@@ -352,6 +352,11 @@ namespace EditorTools
             Stretch(panel.GetComponent<RectTransform>(), 70f, 70f, 850f, 240f);
 
             CreateMessage(panel.transform, FindTitleText(prizeScreen), font);
+            AddPrizeArtwork(panel.transform);
+
+            var messagePanel = panel.transform.Find("MessagePanel") ?? panel.transform.Find("Message");
+            if (messagePanel != null)
+                Stretch(messagePanel.GetComponent<RectTransform>(), 0f, 0f, 300f, 360f);
 
             var button = CloneButton(template, panel.transform, "RestartButton", "Jogar de novo");
             BottomAnchored(button.GetComponent<RectTransform>(), 80f, StandardButtonWidth,
@@ -365,6 +370,24 @@ namespace EditorTools
             prize.ApplyModifiedProperties();
 
             panel.SetActive(false);
+        }
+
+        private static void AddPrizeArtwork(Transform parent)
+        {
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/Resources/Artwork/StationBadges/PrizeReady.png");
+            if (sprite == null)
+                return;
+
+            var imageObject = new GameObject("PrizeArtwork", typeof(RectTransform), typeof(Image));
+            imageObject.transform.SetParent(parent, false);
+
+            var image = imageObject.GetComponent<Image>();
+            image.sprite = sprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+
+            TopAnchored(image.GetComponent<RectTransform>(), 35f, 240f, 120f);
         }
 
         /// <summary>
