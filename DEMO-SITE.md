@@ -56,9 +56,15 @@ git commit -m "Build da demo"
 git push
 ```
 
-O workflow `deploy-pages.yml` publica a pasta `docs/`. A URL fica na aba **Actions**
-do repositório, no passo "Publicar" (algo como
-`https://suricatus.github.io/qr-code-quiz/`) — confirme ali antes de divulgar.
+O workflow `deploy-pages.yml` publica a pasta `docs/`. A URL do jogo é:
+
+**https://suricatus.github.io/qr-code-quiz/**
+
+| Link | Abre |
+|---|---|
+| `https://suricatus.github.io/qr-code-quiz/?demo=1` | demo (é este o link do site) |
+| `https://suricatus.github.io/qr-code-quiz/?station=2` … `=7` | as estações dos QR Codes |
+| `https://suricatus.github.io/qr-code-quiz/?prize=1` | tela de premiação do evento |
 
 ### 4. Embutir na página do WordPress
 
