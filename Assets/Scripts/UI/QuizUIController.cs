@@ -22,11 +22,25 @@ namespace UI
         [SerializeField] private Button submitButton;
         [SerializeField] private Image submitButtonBackground;
 
+        [Header("Demo")]
+        [Tooltip("Botão de voltar ao mapa, visível só na demo. No evento o jogador volta " +
+                 "escaneando outro QR Code, então ele fica escondido.")]
+        [SerializeField] private Button demoBackButton;
+
         private AnswerButton _selectedButton;
+
+        private void Awake()
+        {
+            if (demoBackButton != null)
+                demoBackButton.onClick.AddListener(() => GameManager.Instance.ShowMap());
+        }
 
         private void OnEnable()
         {
             GameManager.OnStationLoaded += Populate;
+
+            if (demoBackButton != null)
+                demoBackButton.gameObject.SetActive(GameManager.Mode == GameMode.Demo);
         }
 
         private void OnDisable()

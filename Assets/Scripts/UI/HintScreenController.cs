@@ -3,6 +3,7 @@ using Core;
 using Data;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI
 {
@@ -12,9 +13,24 @@ namespace UI
         [SerializeField] private TextMeshProUGUI progressText;
         [SerializeField] private PuzzleGridController puzzleGrid;
 
+        [Header("Demo")]
+        [Tooltip("Botão \"Voltar ao mapa\", visível só na demo do site. No evento o jogador " +
+                 "sai desta tela escaneando o QR da próxima estação, sem botão. " +
+                 "Criado pelo menu Suricatus > Demo > Preparar cena da demo.")]
+        [SerializeField] private Button demoContinueButton;
+
+        private void Awake()
+        {
+            if (demoContinueButton != null)
+                demoContinueButton.onClick.AddListener(OnRestartClicked);
+        }
+
         private void OnEnable()
         {
             GameManager.OnHintRequested += Populate;
+
+            if (demoContinueButton != null)
+                demoContinueButton.gameObject.SetActive(GameManager.Mode == GameMode.Demo);
         }
 
         private void OnDisable()
@@ -36,7 +52,7 @@ namespace UI
                 1 => $"Falta 1 de {total} dicas para o prêmio",
                 _ => "Você coletou todas as dicas!"
             };
-            
+
             puzzleGrid.Refresh();
         }
 

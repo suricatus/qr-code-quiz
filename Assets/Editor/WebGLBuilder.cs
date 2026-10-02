@@ -31,10 +31,14 @@ namespace EditorTools
                 return;
             }
 
-            // O GitHub Pages não manda o header Content-Encoding, então arquivos .br/.gz
-            // não carregam. Sem compressão é a combinação que funciona lá.
-            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
-            PlayerSettings.WebGL.decompressionFallback = false;
+            // O GitHub Pages não manda o header Content-Encoding, então o navegador não
+            // descomprime sozinho. O fallback resolve: o loader do Unity descomprime em
+            // JavaScript, sem depender de configuração de servidor. Sem compressão o
+            // download era de 54 MB; com Gzip fica em ~19 MB, o que decide a primeira
+            // impressão de quem abre a demo no 4G. Gzip e não Brotli porque, quando quem
+            // descomprime é o JavaScript, Gzip é bem mais rápido no celular.
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
+            PlayerSettings.WebGL.decompressionFallback = true;
 
             // Nomes previsíveis entre builds, para o cache do celular não servir arquivo velho.
             PlayerSettings.WebGL.nameFilesAsHashes = false;

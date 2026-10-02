@@ -26,6 +26,22 @@ namespace UI
         [Tooltip("Painel exibido após o envio. A partir daí a tela fica bloqueada.")]
         [SerializeField] private GameObject thanksPanel;
 
+        [Header("Demo")]
+        [Tooltip("Objeto que agrupa os campos do formulário. Fica oculto na demo do site, " +
+                 "onde não se coleta dado de ninguém. O aceite de termos e o botão de enviar " +
+                 "são escondidos junto, pelas referências acima.")]
+        [SerializeField] private GameObject formRoot;
+        [Tooltip("Painel exibido no lugar do formulário na demo. Montado pelo menu " +
+                 "Suricatus > Demo > Preparar cena da demo.")]
+        [SerializeField] private GameObject demoPanel;
+        [SerializeField] private Button demoRestartButton;
+        [Tooltip("Título da tela. Na demo ele não pode pedir dados, porque não há " +
+                 "formulário nem brinde para retirar.")]
+        [SerializeField] private TextMeshProUGUI titleText;
+        [SerializeField] private string demoTitle = "Você completou a caça ao QR Code!";
+
+        private string _eventTitle;
+
         private bool _submitted;
 
         private void Awake()
@@ -39,7 +55,39 @@ namespace UI
             if (thanksPanel != null)
                 thanksPanel.SetActive(false);
 
+            if (demoRestartButton != null)
+                demoRestartButton.onClick.AddListener(() => GameManager.Instance.RestartDemo());
+
             ValidateForm();
+        }
+
+        /// <summary>
+        /// Na demo do site a tela de prêmio é só a recompensa da mecânica: nada de
+        /// formulário, porque não há brinde para entregar nem dado para coletar.
+        /// </summary>
+        private void OnEnable()
+        {
+            var isDemo = GameManager.Mode == GameMode.Demo;
+
+            // Campos, aceite de termos e botão de enviar são irmãos na cena, não um grupo
+            // só: esconder apenas o formulário deixaria o resto do formulário na tela.
+            if (formRoot != null)
+                formRoot.SetActive(!isDemo);
+
+            if (termsToggle != null)
+                termsToggle.gameObject.SetActive(!isDemo);
+
+            if (submitButton != null)
+                submitButton.gameObject.SetActive(!isDemo);
+
+            if (demoPanel != null)
+                demoPanel.SetActive(isDemo);
+
+            if (titleText != null)
+            {
+                _eventTitle ??= titleText.text;
+                titleText.text = isDemo ? demoTitle : _eventTitle;
+            }
         }
 
         private void OnPhoneValueChanged(string value)

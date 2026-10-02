@@ -10,9 +10,16 @@ namespace Core
         private const string StationUrlParameter = "station";
         private const string PrizeUrlParameter = "prize";
         private const string ResetUrlParameter = "reset";
-        
+        private const string DemoUrlParameter = "demo";
+
         public static GameManager Instance { get; private set; }
-        
+
+        /// <summary>
+        /// Resolvido uma única vez no Start, a partir da URL. Quem precisa mudar de
+        /// comportamento entre o evento e a demo do site consulta isto.
+        /// </summary>
+        public static GameMode Mode { get; private set; } = GameMode.Event;
+
         [Header("Configuration")]
         public GameConfig config;
 
@@ -22,10 +29,12 @@ namespace Core
         [SerializeField] private string debugQueryString = "";
         [SerializeField] private int debugStationId = 1;
         [SerializeField] private bool debugPrizeScreen = false;
-        
+        [Tooltip("Abre no modo demo (tela de mapa, sem QR), que é como o jogo roda no site.")]
+        [SerializeField] private bool debugDemoMode = false;
+
         public StationData CurrentStation { get; private set; }
         public int SelectedAnswerIndex { get; private set; } = -1;
-        
+
         public static event Action<StationData> OnStationLoaded;
         public static event Action<StationData> OnAnswerCorrect;
         public static event Action OnAnswerWrong;
@@ -57,6 +66,17 @@ namespace Core
                 Debug.Log("[GameManager] Progresso zerado via parâmetro de URL.");
             }
 
+            Mode = ResolveMode();
+
+            if (Mode == GameMode.Demo)
+            {
+                // A demo é vitrine: cada visitante começa limpo, e o que ele joga não
+                // encosta no progresso salvo de quem está no evento com o mesmo build.
+                ProgressManager.Instance.BeginVolatileSession();
+                ShowMap();
+                return;
+            }
+
             if (IsPrizeScreen())
             {
                 UIController.Instance.ShowScreen(GameScreen.Prize);
@@ -64,15 +84,43 @@ namespace Core
             }
             LoadStationFromURL();
         }
-        
+
+        /// <summary>
+        /// Sem "?station=" não existe estação para carregar: até aqui a tela ficava
+        /// vazia, então a ausência de parâmetro passa a significar "abriu a demo".
+        /// </summary>
+        private GameMode ResolveMode()
+        {
+            if (!string.IsNullOrEmpty(URLParameterReader.GetParameter(DemoUrlParameter)))
+                return GameMode.Demo;
+
+#if UNITY_EDITOR
+            // No Editor os campos de debug fazem o papel do QR, então só o toggle decide.
+            return debugDemoMode ? GameMode.Demo : GameMode.Event;
+#else
+            var hasStation = int.TryParse(URLParameterReader.GetParameter(StationUrlParameter), out _);
+            var hasPrize = !string.IsNullOrEmpty(URLParameterReader.GetParameter(PrizeUrlParameter));
+
+            return hasStation || hasPrize ? GameMode.Event : GameMode.Demo;
+#endif
+        }
+
         public void LoadStationFromURL()
         {
-            SelectedAnswerIndex = -1;
             var stationId = GetStationIdFromURL();
 
             if (stationId < 0)
                 return;
 
+            LoadStation(stationId);
+        }
+
+        /// <summary>
+        /// Abre a estação pelo id, venha ele do QR (evento) ou do mapa (demo).
+        /// </summary>
+        public void LoadStation(int stationId)
+        {
+            SelectedAnswerIndex = -1;
             CurrentStation = config.GetStation(stationId);
 
             if (CurrentStation == null)
@@ -80,7 +128,7 @@ namespace Core
                 Debug.LogWarning($"[GameManager] Station {stationId} not found.");
                 return;
             }
-            
+
             if (CurrentStation.isFinalStation && !ProgressManager.Instance.CanAccessFinalStation())
             {
                 UIController.Instance.ShowScreen(GameScreen.Locked);
@@ -92,6 +140,20 @@ namespace Core
             OnStationLoaded?.Invoke(CurrentStation);
         }
 
+        /// <summary>
+        /// Repete a estação atual sem depender da URL — é o "tentar de novo" da tela
+        /// de erro, que precisa funcionar igual no evento e na demo.
+        /// </summary>
+        public void ReloadCurrentStation()
+        {
+            if (CurrentStation != null)
+            {
+                LoadStation(CurrentStation.stationId);
+                return;
+            }
+
+            LoadStationFromURL();
+        }
 
         public void SelectAnswer(int index)
         {
@@ -102,7 +164,7 @@ namespace Core
         {
             if (SelectedAnswerIndex < 0)
                 return;
-            
+
             var isCorrect = SelectedAnswerIndex == CurrentStation.correctAnswerIndex;
 
             if (isCorrect)
@@ -125,10 +187,42 @@ namespace Core
             OnHintRequested?.Invoke(CurrentStation);
         }
 
+        /// <summary>
+        /// Reabre a dica de uma estação já concluída, sem refazer a pergunta. É o que
+        /// o mapa da demo usa quando o visitante toca numa dica que já coletou.
+        /// </summary>
+        public void ShowStationHint(int stationId)
+        {
+            var station = config.GetStation(stationId);
+
+            if (station == null)
+                return;
+
+            CurrentStation = station;
+            SelectedAnswerIndex = -1;
+            ShowHint();
+        }
+
+        /// <summary>
+        /// Mapa do estande: a tela inicial da demo, que faz o papel do QR Code.
+        /// </summary>
+        public void ShowMap()
+        {
+            SelectedAnswerIndex = -1;
+            CurrentStation = null;
+            UIController.Instance.ShowScreen(GameScreen.Map);
+        }
+
         public void Restart()
         {
             SelectedAnswerIndex = -1;
             CurrentStation = null;
+
+            if (Mode == GameMode.Demo)
+            {
+                ShowMap();
+                return;
+            }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
             // Recarrega mantendo o ?station= do QR. Ir para a URL sem parâmetro deixaria
@@ -137,6 +231,30 @@ namespace Core
 #else
             LoadStationFromURL();
 #endif
+        }
+
+        /// <summary>
+        /// Zera a sessão da demo e volta ao mapa, para o próximo visitante começar limpo.
+        /// </summary>
+        public void RestartDemo()
+        {
+            ProgressManager.Instance.ResetProgress();
+            ShowMap();
+        }
+
+        /// <summary>
+        /// Botão da tela final. No evento ele devolve o jogador ao QR, porque o prêmio
+        /// está atrás do QR da premiação; na demo não há QR, então segue direto.
+        /// </summary>
+        public void ContinueFromFinalScreen()
+        {
+            if (Mode == GameMode.Demo)
+            {
+                UIController.Instance.ShowScreen(GameScreen.Prize);
+                return;
+            }
+
+            Restart();
         }
 
         private int GetStationIdFromURL()
@@ -167,6 +285,6 @@ namespace Core
 #endif
         }
     }
-    
+
 
 }

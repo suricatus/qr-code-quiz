@@ -7,7 +7,9 @@ namespace UI
     {
         public void OnTryAgainClicked()
         {
-            GameManager.Instance.LoadStationFromURL();
+            // Repete a estação que o jogador errou. Ler de novo a URL funcionava no
+            // evento, mas na demo não há "?station=" para reler.
+            GameManager.Instance.ReloadCurrentStation();
         }
     }
 }

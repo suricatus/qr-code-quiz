@@ -11,13 +11,18 @@ namespace UI
         Wrong,
         Final,
         Prize,
-        Locked
+        Locked,
+
+        /// <summary>
+        /// Mapa do estande. Só existe na demo do site, onde não há QR Code para escanear.
+        /// </summary>
+        Map
     }
-    
+
     public class UIController : MonoBehaviour
     {
         public static UIController Instance {get; private set;}
-        
+
         [Header("Screens")]
         [SerializeField] private GameObject quizScreen;
         [SerializeField] private GameObject correctScreen;
@@ -26,6 +31,11 @@ namespace UI
         [SerializeField] private GameObject finalScreen;
         [SerializeField] private GameObject prizeScreen;
         [SerializeField] private GameObject lockedScreen;
+
+        [Header("Demo")]
+        [Tooltip("Tela de mapa usada na demo do site. Montada pelo menu " +
+                 "Suricatus > Demo > Preparar cena da demo.")]
+        [SerializeField] private GameObject mapScreen;
 
         private void Awake()
         {
@@ -40,13 +50,28 @@ namespace UI
 
         public void ShowScreen(GameScreen screen)
         {
-            quizScreen.SetActive(screen == GameScreen.Quiz);
-            correctScreen.SetActive(screen == GameScreen.Correct);
-            hintScreen.SetActive(screen == GameScreen.Hint);
-            wrongScreen.SetActive(screen == GameScreen.Wrong);
-            finalScreen.SetActive(screen == GameScreen.Final);
-            prizeScreen.SetActive(screen == GameScreen.Prize);
-            lockedScreen.SetActive(screen == GameScreen.Locked);
+            Toggle(quizScreen, screen == GameScreen.Quiz);
+            Toggle(correctScreen, screen == GameScreen.Correct);
+            Toggle(hintScreen, screen == GameScreen.Hint);
+            Toggle(wrongScreen, screen == GameScreen.Wrong);
+            Toggle(finalScreen, screen == GameScreen.Final);
+            Toggle(prizeScreen, screen == GameScreen.Prize);
+            Toggle(lockedScreen, screen == GameScreen.Locked);
+            Toggle(mapScreen, screen == GameScreen.Map);
+
+            if (screen == GameScreen.Map && mapScreen == null)
+                Debug.LogError("[UIController] A tela de mapa não está atribuída. Rode " +
+                               "Suricatus > Demo > Preparar cena da demo.");
+        }
+
+        /// <summary>
+        /// A tela de mapa é opcional: um build antigo da cena não a tem, e sem o teste
+        /// de nulo o jogo do evento quebraria em todas as trocas de tela.
+        /// </summary>
+        private static void Toggle(GameObject screen, bool isActive)
+        {
+            if (screen != null)
+                screen.SetActive(isActive);
         }
     }
 }

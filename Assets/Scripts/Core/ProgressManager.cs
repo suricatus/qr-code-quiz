@@ -22,6 +22,7 @@ namespace Core
         [SerializeField] private bool resetProgressOnNewBuild = true;
 
         private readonly HashSet<int> _completedStations = new();
+        private bool _volatileSession;
         public int TotalStations => config.stations.Length;
         public int CompletedCount => _completedStations.Count;
         
@@ -63,15 +64,33 @@ namespace Core
                 .All(s => _completedStations.Contains(s.stationId));
         }
         
+        /// <summary>
+        /// Sessão sem gravação: o progresso vive só na memória. A demo do site usa isso
+        /// para começar limpa em cada visita e para não sobrescrever o progresso salvo
+        /// de quem estiver jogando o evento no mesmo navegador.
+        /// </summary>
+        public void BeginVolatileSession()
+        {
+            _volatileSession = true;
+            _completedStations.Clear();
+        }
+
         public void ResetProgress()
         {
             _completedStations.Clear();
+
+            if (_volatileSession)
+                return;
+
             PlayerPrefs.DeleteKey(SaveKey);
             PlayerPrefs.Save();
         }
 
         private void SaveProgress()
         {
+            if (_volatileSession)
+                return;
+
             PlayerPrefs.SetString(SaveKey, string.Join(",", _completedStations));
             PlayerPrefs.Save();
         }
